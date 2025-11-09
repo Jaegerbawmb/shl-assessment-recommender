@@ -1,38 +1,153 @@
-# SHL Assessment Recommender
 
-End-to-end system for recommending **SHL Individual Test Solutions** from a JD/query.
-- Meets API spec: `/health`, `/recommend`
-- Outputs 5–10 assessments with name, URL, test_type, score
-- Balances **technical (K)** vs **behavioral (P)** when the query demands
+# SHL Assessment Recommender (Generative AI Internship Assignment)
 
-## Quickstart
 
-```bash
-# 0) Python
-python -V   # 3.10+
 
-# 1) Install
-python -m venv .venv && source .venv/bin/activate
+This project implements an AI-powered assessment recommendation system for SHL, designed to recommend the most relevant assessments from SHL’s product catalog given a query, job description, or hiring requirement.
+
+Built using FastAPI, FAISS, and Sentence Transformers, the system can be queried directly via API or explored through a simple Streamlit UI.
+
+## 🚀 Features
+
+Semantic Search: Uses all-MiniLM-L6-v2 embeddings to capture contextual meaning of queries.
+
+FAISS Indexing: Enables fast and scalable similarity search across assessment metadata.
+
+Fallback TF-IDF Engine: Provides backup retrieval when embeddings are unavailable.
+
+Re-ranking & Balancing: Prioritizes diverse test types (Knowledge, Personality, Simulation, etc.).
+
+REST API + Streamlit UI: For easy querying, testing, and demonstration.
+
+🧩 Project Structure
+
+shl-assessment-recommender/
+
+
+1) app/
+
+ main.py # FastAPI backend (API endpoint)
+ schemas.py # Request/response models
+ balancer.py # Balances assessment types
+
+
+ 2) scripts/
+
+ crawl_catalog.py # Crawls SHL catalog pages
+
+ build_index.py # Builds FAISS index and metadata
+
+ query_recommender.py # CLI for testing the recommender
+
+ fetch_details.py # Fetches detailed assessment info
+
+ 3) models/
+ embed_index.py # Embedding & FAISS retrieval
+
+ tfidf_fallback.py # TF-IDF retrieval backup
+
+ utils/
+
+ text.py # Text cleaning helpers
+
+ jd_extract.py # Job description extraction
+
+ taxonomy.py # Taxonomy/tag mapping
+
+ 4) ui/
+
+ app.py # Streamlit front-end app
+
+5)  data/
+
+ catalog_full.json # Crawled catalog data
+
+ index.faiss # FAISS vector index
+
+ meta.parquet # Metadata for FAISS
+
+ test_dataset.xlsx # Unlabeled test queries
+
+ submission_results.csv
+
+ README.md
+
+ test_api.py # Automated API testing
+
+## ⚙️ Setup Instructions
+
+### Clone the Repository
+
+git clone https://github.com/<your-username>/shl-assessment-recommender.git
+cd shl-assessment-recommender
+
+
+### Create and Activate a Virtual Environment
+
+python -m venv venv
+venv\Scripts\activate    # on Windows
+source venv/bin/activate # on macOS/Linux
+
+
+### Install Dependencies
+
 pip install -r requirements.txt
 
-# 2) Environment (optional LLM rerank)
-cp .env.example .env
-# Fill keys if you want LLM scoring. Otherwise system uses local cross-encoder fallback.
 
-# 3) Crawl SHL catalog (Individual Test Solutions only)
-python scripts/crawl_catalog.py --out data/catalog_raw.json
+### Run the FastAPI Server
 
-# 4) Build index (FAISS + metadata parquet)
-python scripts/build_index.py   --in data/catalog_raw.json   --faiss data/index.faiss   --meta data/meta.parquet
+uvicorn app.main:app --reload
 
-# 5) Run API
-uvicorn app.main:app --port 8000 --reload
-# GET  /health
-# POST /recommend {"query": "Need Java dev who collaborates with stakeholders", "k": 10}
 
-# 6) Streamlit UI
+The API will now be available at:
+
+http://127.0.0.1:8000/recommend
+
+
+### Run the Streamlit Web App
+
 streamlit run ui/app.py
 
-# 7) Evaluate Mean Recall@10 (using provided Train-Set)
-python scripts/eval_recall.py --train_xlsx "data/Gen_AI Dataset.xlsx" --pred_csv path/to/submission.csv
-```
+
+## 🧠 API Usage
+Endpoint:
+POST /recommend
+
+Example Request:
+{
+  "query": "Looking to hire a Java developer for backend applications",
+  "k": 5
+}
+
+Example Response:
+{
+  "recommended_assessments": [
+    {
+      "name": "Java Developer Test",
+      "url": "https://www.shl.com/products/java-developer-test/",
+      "description": "Multiple-choice test assessing Java knowledge...",
+      "duration": 30,
+      "remote_support": "Yes",
+      "test_type": ["Knowledge & Skills", "Aptitude"]
+    }
+  ]
+}
+
+
+## 📄 Deliverables Summary
+
+Web App URL: Interactive Streamlit interface for user queries.
+
+Get API Endpoint: FastAPI /recommend endpoint returning JSON recommendations.
+
+Report: Approach_and_Optimization.pdf (2-page write-up).
+
+Test Results: submission_results.csv and submission_results_final.csv.
+
+## ✨ Notes
+
+The recommendation logic can be fine-tuned by enriching catalog metadata or improving embedding reranking.
+
+Future improvements may include multilingual support, adaptive scoring, and LLM-based reranking for domain adaptability.
+
+
