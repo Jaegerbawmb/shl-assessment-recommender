@@ -1,23 +1,23 @@
-# Use a lightweight, compatible Python image
-FROM python:3.10-slim
+# 1. Use a stable Python base image (3.11 is better than 3.10 for newer PyTorch)
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy everything into the container
-COPY . /app
+# 2. Copy requirement files first to leverage Docker layer caching
+COPY requirements.txt .
 
-# Install system dependencies (lxml + cleaning support)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    && rm -rf /var/lib/apt/lists/*
+# 3. Install CPU-ONLY PyTorch and then the rest of the dependencies
+# Installing torch first, using the special index URL, is the fix for your build errors.
+RUN pip install torch==2.3.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip install -r requirements.txt
 
-# Upgrade pip
-RUN pip install --upgrade pip
+# 4. Copy the entire project code and data
+COPY . .
 
+# 5. Set the entry point to run the FastAPI server on port 8000 (Railway's default)
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 # Install Python dependencies
 RUN pip install -r requirements.txt
 
