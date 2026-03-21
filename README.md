@@ -1,125 +1,133 @@
+# SHL Assessment Recommender
+### Generative AI Internship Assignment
 
-# SHL Assessment Recommender (Generative AI Internship Assignment)
+An AI-powered assessment recommendation system for SHL — built to surface the most relevant assessments from SHL's product catalog given any query, job description, or hiring requirement.
 
+---
 
+## Overview
 
-This project implements an AI-powered assessment recommendation system for SHL, designed to recommend the most relevant assessments from SHL’s product catalog given a query, job description, or hiring requirement.
+This project uses semantic search and fast vector retrieval to match hiring queries with the right SHL assessments. It exposes a clean REST API and includes a Streamlit UI for interactive exploration.
 
-Built using FastAPI, FAISS, and Sentence Transformers, the system can be queried directly via API or explored through a simple Streamlit UI.
+**Stack:** FastAPI · FAISS · Sentence Transformers · Streamlit · scikit-learn
 
-## 🚀 Features
+---
 
-Semantic Search: Uses all-MiniLM-L6-v2 embeddings to capture contextual meaning of queries.
+## Features
 
-FAISS Indexing: Enables fast and scalable similarity search across assessment metadata.
+| Feature | Description |
+|---|---|
+| **Semantic Search** | Uses `all-MiniLM-L6-v2` embeddings to capture contextual meaning beyond keyword matching |
+| **FAISS Indexing** | Fast, scalable similarity search across assessment metadata |
+| **TF-IDF Fallback** | Backup retrieval engine when embeddings are unavailable |
+| **Re-ranking & Balancing** | Prioritizes diverse test types (Knowledge, Personality, Simulation, etc.) |
+| **REST API** | Clean `/recommend` endpoint returning structured JSON |
+| **Streamlit UI** | Interactive front-end for querying and demonstration |
 
-Fallback TF-IDF Engine: Provides backup retrieval when embeddings are unavailable.
+---
 
-Re-ranking & Balancing: Prioritizes diverse test types (Knowledge, Personality, Simulation, etc.).
+## Project Structure
 
-REST API + Streamlit UI: For easy querying, testing, and demonstration.
-
-🧩 Project Structure
-
+```
 shl-assessment-recommender/
+│
+├── app/
+│   ├── main.py             # FastAPI backend (API endpoint)
+│   ├── schemas.py          # Request/response models
+│   └── balancer.py         # Balances assessment types in results
+│
+├── scripts/
+│   ├── crawl_catalog.py    # Crawls SHL catalog pages
+│   ├── build_index.py      # Builds FAISS index and metadata
+│   ├── query_recommender.py # CLI for testing the recommender
+│   └── fetch_details.py    # Fetches detailed assessment info
+│
+├── models/
+│   ├── embed_index.py      # Embedding & FAISS retrieval
+│   └── tfidf_fallback.py   # TF-IDF retrieval backup
+│
+├── utils/
+│   ├── text.py             # Text cleaning helpers
+│   ├── jd_extract.py       # Job description extraction
+│   └── taxonomy.py         # Taxonomy/tag mapping
+│
+├── ui/
+│   └── app.py              # Streamlit front-end app
+│
+├── data/
+│   ├── catalog_full.json   # Crawled catalog data
+│   ├── index.faiss         # FAISS vector index
+│   ├── meta.parquet        # Metadata for FAISS
+│   ├── test_dataset.xlsx   # Unlabeled test queries
+│   └── submission_results.csv
+│
+├── test_api.py             # Automated API testing
+└── README.md
+```
 
+---
 
-1) app/
+## Setup
 
- main.py # FastAPI backend (API endpoint)
- schemas.py # Request/response models
- balancer.py # Balances assessment types
+### 1. Clone the Repository
 
-
- 2) scripts/
-
- crawl_catalog.py # Crawls SHL catalog pages
-
- build_index.py # Builds FAISS index and metadata
-
- query_recommender.py # CLI for testing the recommender
-
- fetch_details.py # Fetches detailed assessment info
-
- 3) models/
- embed_index.py # Embedding & FAISS retrieval
-
- tfidf_fallback.py # TF-IDF retrieval backup
-
- utils/
-
- text.py # Text cleaning helpers
-
- jd_extract.py # Job description extraction
-
- taxonomy.py # Taxonomy/tag mapping
-
- 4) ui/
-
- app.py # Streamlit front-end app
-
-5)  data/
-
- catalog_full.json # Crawled catalog data
-
- index.faiss # FAISS vector index
-
- meta.parquet # Metadata for FAISS
-
- test_dataset.xlsx # Unlabeled test queries
-
- submission_results.csv
-
- README.md
-
- test_api.py # Automated API testing
-
-## ⚙️ Setup Instructions
-
-### Clone the Repository
-
+```bash
 git clone https://github.com/<your-username>/shl-assessment-recommender.git
 cd shl-assessment-recommender
+```
 
+### 2. Create a Virtual Environment
 
-### Create and Activate a Virtual Environment
-
+```bash
 python -m venv venv
-venv\Scripts\activate    # on Windows
-source venv/bin/activate # on macOS/Linux
 
+# Windows
+venv\Scripts\activate
 
-### Install Dependencies
+# macOS / Linux
+source venv/bin/activate
+```
 
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
+### 4. Run the FastAPI Server
 
-### Run the FastAPI Server
-
+```bash
 uvicorn app.main:app --reload
+```
 
+API available at: `http://127.0.0.1:8000/recommend`
 
-The API will now be available at:
+### 5. Run the Streamlit UI
 
-http://127.0.0.1:8000/recommend
-
-
-### Run the Streamlit Web App
-
+```bash
 streamlit run ui/app.py
+```
 
+---
 
-## 🧠 API Usage
-Endpoint:
-POST /recommend
+## API Reference
 
-Example Request:
+### `POST /recommend`
+
+Returns a ranked list of SHL assessments matching the query.
+
+**Request**
+
+```json
 {
   "query": "Looking to hire a Java developer for backend applications",
   "k": 5
 }
+```
 
-Example Response:
+**Response**
+
+```json
 {
   "recommended_assessments": [
     {
@@ -132,22 +140,23 @@ Example Response:
     }
   ]
 }
+```
 
+---
 
-## 📄 Deliverables Summary
+## Deliverables
 
-Web App URL: Interactive Streamlit interface for user queries.
+- **Web App** — Interactive Streamlit interface for user queries
+- **API Endpoint** — `POST /recommend` returning JSON recommendations
+- **Report** — `Approach_and_Optimization.pdf` (2-page technical write-up)
+- **Results** — `submission_results.csv` and `submission_results_final.csv`
 
-Get API Endpoint: FastAPI /recommend endpoint returning JSON recommendations.
+---
 
-Report: Approach_and_Optimization.pdf (2-page write-up).
+## Notes & Future Work
 
-Test Results: submission_results.csv and submission_results_final.csv.
-
-## ✨ Notes
-
-The recommendation logic can be fine-tuned by enriching catalog metadata or improving embedding reranking.
-
-Future improvements may include multilingual support, adaptive scoring, and LLM-based reranking for domain adaptability.
-
-
+- Recommendation quality can be improved by enriching catalog metadata or fine-tuning embedding reranking.
+- Potential future additions:
+  - Multilingual query support
+  - Adaptive scoring based on role seniority
+  - LLM-based reranking for better domain adaptability
