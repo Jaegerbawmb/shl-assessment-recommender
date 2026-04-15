@@ -1,5 +1,5 @@
 # SHL Assessment Recommender
-### Generative AI Internship Assignment
+
 
 An AI-powered assessment recommendation system for SHL — built to surface the most relevant assessments from SHL's product catalog given any query, job description, or hiring requirement.
 
